@@ -1,5 +1,6 @@
 
 
+import requests
 from dbconnector.es_functions import find_card_names_in_string, get_closest_vectors
 import os
 from dotenv import load_dotenv
@@ -19,17 +20,43 @@ def get_present_card_info(question):
     for obj in sorted_cardnames:
         if not any(obj.get('name', '') in other_obj.get('name', '') for other_obj in reduced_cardnames):
             reduced_cardnames.append(obj)
-    print(reduced_cardnames)
+    # print(reduced_cardnames)
+    return reduce_card_fields(reduced_cardnames)
+
+def reduce_card_fields(cards):
+    reduced_cards = []
+    for card in cards:
+        name = card.get('name')
+        oracle_text = card.get('oracle_text')
+        rulings_uri = card.get('rulings_uri')
+
+        # Attempt to fetch the rulings content from the rulings_uri
+        try:
+            response = requests.get(rulings_uri)
+            response.raise_for_status()  # Raise an HTTPError for bad responses
+            rulings_data = response.json().get("data", [])  # Extract rulings list
+            rulings_comments = [ruling.get("comment") for ruling in rulings_data]  # Extract only comments
+        except Exception as e:
+            rulings_comments = [f"Error fetching rulings: {e}"]
+        
+        reduced_cards.append({
+            'name': name,
+            'oracle_text': oracle_text,
+            'rulings': rulings_comments  # Store only the list of comments
+        })
+    
+    return reduced_cards
       
-def get_relevant_questions(user_input):
-    releveant_questions = []
+def get_relevant_data(user_input,index):
+    releveant_data = []
     load_dotenv()
-    question_index = os.getenv("ES_QUESTION_INDEX")
-    results = get_closest_vectors(user_input,question_index)
+    data_index = os.getenv(index)
+    results = get_closest_vectors(user_input,data_index)
     for idx, result in enumerate(results):
         content = result['source'].get('content', 'No content available')
-        releveant_questions.append(content)    
-    return releveant_questions
+        releveant_data.append(content)    
+    return releveant_data
+
 
 def get_full_prompt(present_cards,relevant_questions,relevant_rules,user_input):
     return "Kappa"
