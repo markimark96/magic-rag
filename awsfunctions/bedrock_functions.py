@@ -1,5 +1,4 @@
 from awsfunctions.aws_functions import get_aws_client
-from langchain_aws import BedrockLLM
 from dotenv import load_dotenv
 import os
 import boto3
@@ -7,15 +6,17 @@ import json
 
 
 
-def get_llm_answer(question):
-    load_dotenv()
-    bedrock_client = get_aws_client("bedrock-runtime")
-    llm = BedrockLLM(
-        client=bedrock_client,
-        model_id=os.getenv("LLM_MODEL_ID")  
+def query_llm(prompt):
+    client = get_aws_client("bedrock-runtime")  
+    model_id = os.getenv("LLM_MODEL_ID")
+
+    response = client.invoke_model(
+        modelId=model_id,
+        body=json.dumps({"prompt": prompt, "max_tokens_to_sample": 5000})  
     )
-    response = llm.invoke(question)
-    return response
+
+    response_body = json.loads(response["body"].read().decode("utf-8"))
+    return response_body.get("completion", "No response generated.")
 
 def get_embedding(input_string):
     load_dotenv()

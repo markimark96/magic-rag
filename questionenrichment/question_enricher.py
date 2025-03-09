@@ -59,5 +59,28 @@ def get_relevant_data(user_input,index):
 
 
 def get_full_prompt(present_cards,relevant_questions,relevant_rules,user_input):
-    return "Kappa"
+    return f"""
+Human:
+You are a Magic the Gathering judge, who is expert in the games rules, but always tries to answer according to the data that is given to him.
+Given this context try to answer the question below. Only answer if the context contains relevant information, else say that you dont have enough information and please give a more elaborate question.
+It may be the case that some parts of the context is irrelevant to the question. In this case just ignore it!
+
+Here are 3 rules that may or may not be relevant for you:
+{relevant_rules}
+
+
+Here are 3 questions with their answer from a forum that may or may not be relevant to you:
+{relevant_questions}
+
+
+Here are the cards with their rulings that are present in the question:
+{present_cards}
+
+
+Given the abow context try to answer this question:
+{user_input}
+
+
+Assistant:
+"""
     
