@@ -91,6 +91,8 @@ def filter_for_longest_names(sorted_cards):
 
 def fetch_rulings(rulings_uri):
     """Fetch rulings from the provided URI and extract comments.
+    (The card database is extracted from Scryfall where the rulings are not stored in the card objects, 
+     but this data can be fetched from a different URI).
     
     Args:
         rulings_uri (str): URI to fetch rulings from
