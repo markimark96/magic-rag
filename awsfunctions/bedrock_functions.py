@@ -12,7 +12,7 @@ def query_llm(prompt):
 
     response = client.invoke_model(
         modelId=model_id,
-        body=json.dumps({"prompt": prompt, "max_tokens_to_sample": 5000})  
+        body=json.dumps({"prompt": prompt, "max_tokens_to_sample": 10000})  
     )
 
     response_body = json.loads(response["body"].read().decode("utf-8"))
